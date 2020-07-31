@@ -22,8 +22,8 @@ namespace Microsoft.PowerVirtualAgents.Samples.RelayBotSample.Bots
     /// </summary>
     public class RelayBot : ActivityHandler
     {
-        private const int WaitForBotResponseMaxMilSec = 5 * 1000;
-        private const int PollForBotResponseIntervalMilSec = 1000;
+        private const int WaitForBotResponseMaxMilSec = 15 * 500;
+        private const int PollForBotResponseIntervalMilSec = 500;
         private static ConversationManager s_conversationManager = ConversationManager.Instance;
         private ResponseConverter _responseConverter;
         private IBotService _botService;
