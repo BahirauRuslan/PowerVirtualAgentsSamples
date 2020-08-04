@@ -26,7 +26,7 @@ namespace Microsoft.PowerVirtualAgents.Samples.RelayBotSample
             {
                 return null;
             }
-
+            
             var dlAttachments = directLineActivity.Attachments;
             if (dlAttachments != null && dlAttachments.Count() > 0)
             {
