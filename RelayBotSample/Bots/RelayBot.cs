@@ -22,14 +22,15 @@ namespace Microsoft.PowerVirtualAgents.Samples.RelayBotSample.Bots
     /// </summary>
     public class RelayBot : ActivityHandler
     {
-        private const int WaitForBotResponseMaxMilSec = 15 * 500;
-        private const int PollForBotResponseIntervalMilSec = 500;
+        private const int WaitForBotResponseMaxMilSec = 30 * 1000;
+        private const int PollForBotResponseIntervalMilSec = 1000;
         private static ConversationManager s_conversationManager = ConversationManager.Instance;
         private ResponseConverter _responseConverter;
         private IBotService _botService;
-
+        
         public RelayBot(IBotService botService, ConversationManager conversationManager)
         {
+            
             _botService = botService;
             _responseConverter = new ResponseConverter();
         }
@@ -58,10 +59,9 @@ namespace Microsoft.PowerVirtualAgents.Samples.RelayBotSample.Bots
                     TextFormat = turnContext.Activity.TextFormat,
                     Locale = turnContext.Activity.Locale,
                 });
-
-                await RespondPowerVirtualAgentsBotReplyAsync(client, currentConversation, turnContext);
+              
+                Task.Factory.StartNew(async () => await RespondPowerVirtualAgentsBotReplyAsync(new DirectLineClient(currentConversation.Token), currentConversation, turnContext));
             }
-
             // Update LastConversationUpdateTime for session management
             currentConversation.LastConversationUpdateTime = DateTime.Now;
         }
@@ -90,6 +90,16 @@ namespace Microsoft.PowerVirtualAgents.Samples.RelayBotSample.Bots
 
                     currentConversation.WaterMark = response.Watermark;
                     await turnContext.SendActivitiesAsync(_responseConverter.ConvertToBotSchemaActivities(botResponses).ToArray());
+                    
+                    if (retry < retryMax - 2)
+                    {
+                        retry = retryMax - 2;
+                    }
+                }
+
+                if (retry >= 6 && retry % 6 == 0 && retry != retryMax - 2)
+                {
+                    await turnContext.SendActivityAsync(MessageFactory.Text("Wait..."));
                 }
 
                 Thread.Sleep(PollForBotResponseIntervalMilSec);
